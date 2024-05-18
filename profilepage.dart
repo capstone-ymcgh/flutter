@@ -2,172 +2,175 @@ import 'package:flutter/material.dart';
 import 'loginpage.dart';
 
 
+class ProfilePage extends StatefulWidget {
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
 
-class ProfilePage extends StatelessWidget {
+class _ProfilePageState extends State<ProfilePage> {
+  String nickname = "nickname";
+  String e_mail = "e-mail";
+  String passward = "passward";
+  String newNickname = ''; // 새로운 닉네임을 저장할 변수
+
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(Icons.account_circle, size: 60),
-                SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'nickname',
-                      style: TextStyle(fontSize: 24),
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(Icons.account_circle, size: 60),
+                  SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$nickname',
+                        style: TextStyle(fontSize: 24),
+                      ),
+                      Text(
+                        '$e_mail',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              GestureDetector(
+                onTap: () {
+                  // 로그아웃 확인 창을 띄우는 함수 호출
+                  _showLogoutConfirmationDialog(context);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.orange[200],
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  padding:
+                  EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+                  child: Text(
+                    '로그아웃',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15.0,
                     ),
-                    Text(
-                      'e-mail',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            GestureDetector(
-              onTap: () {
-                // 로그아웃 확인 창을 띄우는 함수 호출
-                _showLogoutConfirmationDialog(context);
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.orange[200],
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                padding:
-                EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-                child: Text(
-                  '로그아웃',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15.0,
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-        Divider(
-          color: Colors.grey, // 선의 색상 설정
-          thickness: 1, // 선의 두께 설정
-          height: 30, // 선의 높이 설정
-        ),
-        Text('개인정보 변경'),
-        SizedBox(height: 20), // 추가적인 간격 조절
-        // 닉네임 변경 버튼
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end, // 오른쪽으로 정렬
-          children: [
-            GestureDetector(
+            ],
+          ),
+          Divider(
+            color: Colors.grey, // 선의 색상 설정
+            thickness: 1, // 선의 두께 설정
+            height: 30, // 선의 높이 설정
+          ),
+          Text('개인정보 변경'),
+          SizedBox(height: 20), // 추가적인 간격 조절
+          // 닉네임 변경 버튼
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end, // 오른쪽으로 정렬
+            children: [
+              GestureDetector(
+                onTap: () {
+                  _showNicknameChangeDialog(context);
+                },
+                child: Text('닉네임 변경', style: TextStyle(fontSize: 20)),
+              ),
+            ],
+          ),
+          SizedBox(height: 20), // 추가적인 간격 조절
+          // 사진 변경 버튼
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end, // 오른쪽으로 정렬
+            children: [
+              GestureDetector(
+                onTap: () {},
+                child: Text('프로필 사진 변경', style: TextStyle(fontSize: 20)),
+              ),
+            ],
+          ),
+          SizedBox(height: 20), // 추가적인 간격 조절
+          // 비밀번호 변경 버튼
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end, // 오른쪽으로 정렬
+            children: [
+              GestureDetector(
+                onTap: () {},
+                child: Text('비밀번호 변경', style: TextStyle(fontSize: 20)),
+              ),
+            ],
+          ),
+          SizedBox(height: 20), // 추가적인 간격 조절
+          // 선 추가
+          Divider(
+            color: Colors.grey, // 선의 색상 설정
+            thickness: 1, // 선의 두께 설정
+            height: 30, // 선의 높이 설정
+          ),
+          Text('레시피 공유 게시판'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end, // 오른쪽으로 정렬
+            children: [
+              GestureDetector(
+                onTap: () {},
+                child: Text('작성한 글', style: TextStyle(fontSize: 20)),
+              ),
+            ],
+          ),
+          SizedBox(height: 20), // 추가적인 간격 조절
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end, // 오른쪽으로 정렬
+            children: [
+              GestureDetector(
+                onTap: () {},
+                child: Text('작성한 댓글', style: TextStyle(fontSize: 20)),
+              ),
+            ],
+          ),
+          SizedBox(height: 20), // 추가적인 간격 조절
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end, // 오른쪽으로 정렬
+            children: [
+              GestureDetector(
+                onTap: () {},
+                child: Text('즐겨찾기한 글', style: TextStyle(fontSize: 20)),
+              ),
+            ],
+          ),
+          SizedBox(height: 20), // 추가적인 간격 조절
+          Divider(
+            color: Colors.grey, // 선의 색상 설정
+            thickness: 1, // 선의 두께 설정
+            height: 30, // 선의 높이 설정
+          ),
+          SizedBox(height: 20), // 추가적인 간격 조절
+          Center(
+            // 가운데 정렬을 위해 Center 위젯 사용
+            child: GestureDetector(
               onTap: () {
-                _showNicknameChangeDialog(context);
+                _showWithdrawalConfirmationDialog(context);
               },
-              child: Text('닉네임 변경',style:TextStyle(fontSize: 20)),
-            ),
-          ],
-        ),
-        SizedBox(height: 20), // 추가적인 간격 조절
-        // 사진 변경 버튼
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end, // 오른쪽으로 정렬
-          children: [
-            GestureDetector(
-              onTap: () {
-
-              },
-              child: Text('프로필 사진 변경',style:TextStyle(fontSize: 20)),
-            ),
-          ],
-        ),
-        SizedBox(height: 20), // 추가적인 간격 조절
-        // 비밀번호 변경 버튼
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end, // 오른쪽으로 정렬
-          children: [
-            GestureDetector(
-              onTap: () {
-
-              },
-              child: Text('비밀번호 변경',style:TextStyle(fontSize: 20)),
-            ),
-          ],
-        ),
-        SizedBox(height: 20), // 추가적인 간격 조절
-        // 선 추가
-        Divider(
-          color: Colors.grey, // 선의 색상 설정
-          thickness: 1, // 선의 두께 설정
-          height: 30, // 선의 높이 설정
-        ),
-        Text('레시피 공유 게시판'),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end, // 오른쪽으로 정렬
-          children: [
-            GestureDetector(
-              onTap: () {
-
-              },
-              child: Text('작성한 글',style:TextStyle(fontSize: 20)),
-            ),
-          ],
-        ),
-        SizedBox(height: 20), // 추가적인 간격 조절
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end, // 오른쪽으로 정렬
-          children: [
-            GestureDetector(
-              onTap: () {
-
-              },
-              child: Text('작성한 댓글',style:TextStyle(fontSize: 20)),
-            ),
-          ],
-        ),
-        SizedBox(height: 20), // 추가적인 간격 조절
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end, // 오른쪽으로 정렬
-          children: [
-            GestureDetector(
-              onTap: () {
-
-              },
-              child: Text('즐겨찾기한 글',style:TextStyle(fontSize: 20)),
-            ),
-          ],
-        ),
-        SizedBox(height: 20), // 추가적인 간격 조절
-        Divider(
-          color: Colors.grey, // 선의 색상 설정
-          thickness: 1, // 선의 두께 설정
-          height: 30, // 선의 높이 설정
-        ),
-        SizedBox(height: 20), // 추가적인 간격 조절
-        Center( // 가운데 정렬을 위해 Center 위젯 사용
-          child: GestureDetector(
-            onTap: () {
-              _showWithdrawalConfirmationDialog(context);
-            },
-            child: Text(
-              '회원 탈퇴',
-              style: TextStyle(
-                color: Colors.red,
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
+              child: Text(
+                '회원 탈퇴',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -237,8 +240,9 @@ class ProfilePage extends StatelessWidget {
       },
     );
   }
+
   void _showNicknameChangeDialog(BuildContext context) {
-    String newNickname = ''; // 새로운 닉네임을 저장할 변수
+
 
     showDialog(
       context: context,
@@ -267,6 +271,10 @@ class ProfilePage extends StatelessWidget {
                 // 여기에 새 닉네임을 서버에 업데이트하는 로직을 추가할 수 있습니다.
                 Navigator.of(context).pop();
                 print('새로운 닉네임: $newNickname');
+                nickname = newNickname;
+                setState((){
+                  nickname = newNickname;
+                });
               },
               child: Text('확인'),
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'loginpage.dart';
 import 'profilepage.dart';
 import 'calendarpage.dart';
@@ -51,8 +52,9 @@ class _MyHomePageState extends State<MyHomePage> {
           );
           return false;
         }
-        return true;
+        exit(0); // 앱 종료
       },
+
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.orange[300],

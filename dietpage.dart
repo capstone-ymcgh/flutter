@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'calendarpage.dart';
 import 'main.dart';
+import 'infopage.dart';
 
 class DietPage extends StatefulWidget {
   final List<DateTime> selectedDates;
@@ -100,7 +101,7 @@ class _DietPageState extends State<DietPage> {
             child: ElevatedButton(
               onPressed: () {
                 // 버튼을 눌렀을 때 실행되는 동작
-                Navigator.push(
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => MyHomePage()),
                 );
@@ -130,6 +131,10 @@ class _DietPageState extends State<DietPage> {
               // 특정 행동을 수행하도록 설정
               print('ListTile이 눌렸습니다. 인덱스: $index');
               // 여기에 원하는 동작을 추가하십시오.
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => InfoPage()),
+              );
             },
             child: Column(
               children: <Widget>[
@@ -165,16 +170,20 @@ class _DietPageState extends State<DietPage> {
               onTap: () {
                 // 박스를 눌렀을 때 실행되는 동작
                 print('Box $index tapped with texts: $boxTexts');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => InfoPage()),
+                );
               },
               child: Container(
-                color: Colors.blue, // 박스의 배경색
+                color: Colors.orange[300], // 박스의 배경색
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: boxTexts
                       .map(
                         (text) => Text(
                       text, // 각 줄에 해당하는 텍스트
-                      style: TextStyle(color: Colors.white, fontSize: 10),
+                      style: TextStyle(color: Colors.black, fontSize: 10),
                     ),
                   )
                       .toList(),
