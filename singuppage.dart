@@ -11,7 +11,7 @@ class SignUpPage extends StatelessWidget {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        backgroundColor: Color(0xffA259FF),
+        backgroundColor: Colors.orange[300],
         title: Text('회원가입'),
       ),
       body: SingleChildScrollView(
@@ -30,6 +30,7 @@ class SignUpPage extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: '이메일',
                   border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.email),
                 ),
               ),
               SizedBox(height: 16.0),
@@ -37,6 +38,7 @@ class SignUpPage extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: '닉네임',
                   border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.account_circle),
                 ),
               ),
               SizedBox(height: 16.0),
@@ -44,6 +46,7 @@ class SignUpPage extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: '비밀번호',
                   border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock),
                 ),
                 obscureText: true,
               ),
@@ -52,6 +55,7 @@ class SignUpPage extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: '비밀번호 확인',
                   border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock),
                 ),
                 obscureText: true,
               ),
