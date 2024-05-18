@@ -3,10 +3,12 @@ import 'main.dart';
 import 'singuppage.dart';
 import 'forgotpasswordpage.dart';
 
-
-
-//로그인 페이지
+// 로그인 페이지
 class LoginPage extends StatelessWidget {
+  // TextEditingController를 생성
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,6 +31,7 @@ class LoginPage extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
+                controller: emailController, // TextEditingController 할당
                 decoration: InputDecoration(
                   hintText: '이메일',
                   border: OutlineInputBorder(),
@@ -37,6 +40,7 @@ class LoginPage extends StatelessWidget {
               ),
               SizedBox(height: 16.0),
               TextField(
+                controller: passwordController, // TextEditingController 할당
                 decoration: InputDecoration(
                     hintText: '비밀번호',
                     border: OutlineInputBorder(),
@@ -48,7 +52,7 @@ class LoginPage extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      // 버튼을 눌렀을 때 실행되는 동작
+                      // 회원가입 버튼을 눌렀을 때 실행되는 동작
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => SignUpPage()),
@@ -59,8 +63,7 @@ class LoginPage extends StatelessWidget {
                         color: Colors.blue,
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      padding:
-                      EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                       child: Text(
                         '회원가입',
                         style: TextStyle(
@@ -73,11 +76,10 @@ class LoginPage extends StatelessWidget {
                   SizedBox(width: 16.0), // 버튼 간격 추가
                   GestureDetector(
                     onTap: () {
-                      // 버튼을 눌렀을 때 실행되는 동작
+                      // 비밀번호 찾기 버튼을 눌렀을 때 실행되는 동작
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => ForgotPasswordPage()),
+                        MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
                       );
                     },
                     child: Container(
@@ -85,8 +87,7 @@ class LoginPage extends StatelessWidget {
                         color: Colors.blue,
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      padding:
-                      EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                       child: Text(
                         '비밀번호 찾기',
                         style: TextStyle(
@@ -99,7 +100,14 @@ class LoginPage extends StatelessWidget {
                   Spacer(), // 나머지 공간을 차지하도록 설정
                   GestureDetector(
                     onTap: () {
-                      // 버튼을 눌렀을 때 실행되는 동작
+                      // 로그인 버튼을 눌렀을 때 실행되는 동작
+                      String email = emailController.text;
+                      String password = passwordController.text;
+
+                      // 여기서 로그인 로직을 추가할 수 있습니다.
+                      // 예를 들어, 서버로 전송하거나 유효성 검증을 수행하는 등
+                      print(email+','+password);
+                      // 로그인 성공 시 홈 페이지로 이동
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => MyHomePage()),
@@ -110,8 +118,7 @@ class LoginPage extends StatelessWidget {
                         color: Colors.blue,
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      padding:
-                      EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                       child: Text(
                         '로그인',
                         style: TextStyle(
