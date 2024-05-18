@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'dietpage.dart';
 
+
 class InputPage extends StatelessWidget {
   final TextEditingController _controller1 = TextEditingController(text: DateTime.now().year.toString());
   final TextEditingController _controller2 = TextEditingController(text: DateTime.now().month.toString());
