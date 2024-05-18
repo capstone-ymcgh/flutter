@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'loginpage.dart';
 import 'profilepage.dart';
+import 'calendarpage.dart';
 
 void main() {
   runApp(MyApp());
@@ -28,8 +29,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final List<Widget> _pages = [
     HomePage(),
-    SearchPage(),
-    FavoritesPage(),
+    InputPage(),
+    InputPage(),
     ProfilePage(),
   ];
 
@@ -55,12 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.orange[300],
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_rounded),
-            onPressed: () {
-              // 뒤로 가기 버튼을 눌렀을 때 실행할 동작
-            },
-          ),
+          automaticallyImplyLeading: false,
         ),
         body: Center(
           // 현재 선택된 아이템에 해당하는 텍스트를 표시
@@ -138,42 +134,8 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class SearchPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Favorites Page'),
-    );
-  }
-}
 
-class FavoritesPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 3, // 3x3 grid
-      crossAxisSpacing: 8.0, // Horizontal spacing between grid items
-      mainAxisSpacing: 8.0, // Vertical spacing between grid items
-      children: [
-        Image.network(
-          'https://img.freepik.com/free-photo/top-view-of-grilled-prawns-garnished-with-pickles-and-flowers_140725-1464.jpg?size=626&ext=jpg',
-          width: 150,
-          height: 150,
-        ),
-        Image.network(
-          'https://img.freepik.com/free-photo/high-angle-of-jelly-candies-on-plate-with-spoon_23-2148691431.jpg?size=626&ext=jpg',
-          width: 150,
-          height: 150,
-        ),
-        Image.network(
-          'https://img.freepik.com/free-photo/meat-salad-with-vegetables-on-the-table_140725-7398.jpg?size=626&ext=jpg',
-          width: 150,
-          height: 150,
-        ),
-      ],
-    );
-  }
-}
+
 
 
 

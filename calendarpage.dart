@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'dietpage.dart';
 
 class InputPage extends StatelessWidget {
   final TextEditingController _controller1 = TextEditingController(text: DateTime.now().year.toString());
@@ -163,6 +164,10 @@ class _CalendarPageState extends State<CalendarPage> {
             onTap: () {
               // 버튼을 눌렀을 때 실행되는 동작
               print('확인 버튼이 눌렸습니다.');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => DietPage(_selectedDates)),
+              );
             },
             child: Container(
               decoration: BoxDecoration(

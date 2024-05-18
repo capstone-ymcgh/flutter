@@ -7,7 +7,7 @@ class ForgotPasswordPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xffA259FF),
+        backgroundColor: Colors.orange[300],
         title: Text('비밀번호 찾기'),
       ),
       body: Center(

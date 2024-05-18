@@ -40,8 +40,7 @@ class LoginPage extends StatelessWidget {
                 decoration: InputDecoration(
                     hintText: '비밀번호',
                     border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock),
-                    suffixIcon: Icon(Icons.visibility_off)),
+                    prefixIcon: Icon(Icons.lock)),
                 obscureText: true,
               ),
               SizedBox(height: 16.0),
