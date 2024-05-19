@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 
@@ -25,6 +26,18 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('도매 상품 주문'),
         actions: <Widget>[
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CartPage(productName: '', productPrice: '',)
+                ),
+              );
+              // 장바구니 아이콘으로 바꾸기
+            },
+            icon: Icon(Icons.card_travel),
+            iconSize: 29,
+          ),
           IconButton(
             icon: const Icon(Icons.search),
             iconSize: 28,
@@ -52,6 +65,8 @@ class BoxItem {
   final int id; // 게시물을 식별하는 고유한 식별자
   List<String> comments; // New property to store comments
 
+  //bool isSelected;
+
   BoxItem({
     this.title,
     this.ingredient,
@@ -60,6 +75,7 @@ class BoxItem {
     required this.postDate,
     this.likeCount = 0, //기본값은 0으로 설정
     required this.id,
+
     List<String>? comments, // Nullable list of comments
   }) : comments = comments ?? []; // Initialize comments list
 
@@ -71,6 +87,7 @@ class BoxItem {
       content: json['content'],
       imagePath: json['imagePath'],
       postDate: DateTime.parse(json['postDate']),
+
       id: 1, // JSON에서 DateTime으로 변환
     );
   }
@@ -83,6 +100,7 @@ class BoxItem {
       'content': content,
       'imagePath': imagePath,
       'postDate': postDate.toIso8601String(), // DateTime을 ISO 8601 문자열로 변환
+
     };
   }
 }
@@ -261,6 +279,7 @@ class _BoxGridState extends State<BoxGrid> {
                                 saveBoxList();
                               }
                             },
+                            // 기본 페이지
                             child: Container(
                               margin: EdgeInsets.fromLTRB(3, 3, 3, 0),
                               decoration: BoxDecoration(
@@ -312,7 +331,11 @@ class _BoxGridState extends State<BoxGrid> {
                                               onPressed: () {
                                                 Navigator.push(
                                                   context,
-                                                  MaterialPageRoute(builder: (context) => CartPage()
+                                                  MaterialPageRoute(builder: (context) => CartPage(
+                                                    // 상품 정보를 전달
+                                                    productName: boxList[index].ingredient ?? '',
+                                                    productPrice: boxList[index].title ?? '',
+                                                  )
                                                   ),
                                                 );
                                                 // 장바구니 아이콘으로 바꾸기
@@ -338,47 +361,78 @@ class _BoxGridState extends State<BoxGrid> {
                                           const SizedBox(height: 2.0),
                                           Row(
                                             children: [
-                                              Image.asset(
-                                                'assets/profile_image.png',
-                                                width: 22.0,
+                                              Padding(
+                                                padding:EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                                child: Image.asset(
+                                                  'assets/profile_image.png',
+                                                  width: 22.0,
+                                                ),
                                               ),
-                                              SizedBox(width: 3.0),
-                                              Text(
-                                                '사업자명',
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 12),
+                                              Padding(
+                                                padding: EdgeInsets.fromLTRB(4, 0, 0, 0),
+                                                child:  Text(
+                                                  '사업자명',
+                                                  style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 12),
+                                                ),
                                               ),
                                             ],
                                           ),
+                                          // 가격 표시
+                                          const SizedBox(height: 5.0),
+                                          Padding(
+                                            padding:EdgeInsets.fromLTRB(2, 0, 0, 0),
+                                            child:Text(
+                                              '${boxList[index].title ?? 'Title'} 원',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 17),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
                                           //글 제목(기본페이지)
-                                          const SizedBox(height: 9.0),
-                                          Text(
-                                            '${boxList[index].title ?? 'Title'}원',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 15),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
+                                          const SizedBox(height: 0.0),
+
+                                          Padding(
+                                            padding:EdgeInsets.fromLTRB(1, 0, 0, 0),
+                                            child:Text(
+                                              '${boxList[index].ingredient ?? 'ingredient'}',
+                                              style: TextStyle(
+
+                                                  fontSize: 18),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ),
                                         ],
                                       ),
                                     ),
                                   ),
                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Padding(
-                                        padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                                        child: TextButton(
-                                          onPressed: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(builder: (context) => OrderPage()
+                                        padding: EdgeInsets.fromLTRB(0, 0, 0, 5),
+                                        child: Container(
+                                          width: 199, // 버튼의 가로 크기
+                                          height: 50, // 버튼의 세로 크기
+                                          child: TextButton(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(builder: (context) => OrderPage(cartItems: [],)),
+                                              );
+                                              // 주문하기 버튼이 눌렸을 때 수행할 작업 추가
+                                            },
+                                            child: Text(
+                                              '주문하기',
+                                              style: TextStyle(
+                                                fontSize: 15,
                                               ),
-                                            );
-                                            // 주문하기 버튼이 눌렸을 때 수행할 작업 추가
-                                          },
-                                          child: Text('주문하기'),
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -458,7 +512,8 @@ class _DetailPageState extends State<DetailPage> {
   void initState() {
     super.initState();
     titleController = TextEditingController(text: widget.boxItem.title);
-    ingredientController = TextEditingController(text: widget.boxItem.ingredient);
+    ingredientController =
+        TextEditingController(text: widget.boxItem.ingredient);
     contentController = TextEditingController(text: widget.boxItem.content);
   }
 
@@ -541,146 +596,155 @@ class _DetailPageState extends State<DetailPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: isEditing
-            ? Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (isEditing)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    GestureDetector(
-                      onTap: () async {
-                        final pickedImage = await ImagePicker().getImage(source: ImageSource.gallery);
-                        if (pickedImage != null) {
-                          setState(() {
-                            widget.boxItem.imagePath = pickedImage.path;
-                          });
-                        }
-                      },
-                      child: Container(
-                        width: 100,
-                        height: 100,
-                        color: Color(0xFFD9D9D9),
-                        margin: EdgeInsets.only(left: 0, bottom: 8),
-                        child: Icon(
-                          Icons.add,
-                          color: Color(0xff4ECB71),
-                          size: 40,
+        child: SingleChildScrollView(
+          child: isEditing
+              ? Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (isEditing)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      GestureDetector(
+                        onTap: () async {
+                          final pickedImage = await ImagePicker().getImage(
+                              source: ImageSource.gallery);
+                          if (pickedImage != null) {
+                            setState(() {
+                              widget.boxItem.imagePath = pickedImage.path;
+                            });
+                          }
+                        },
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          color: Color(0xFFD9D9D9),
+                          margin: EdgeInsets.only(left: 0, bottom: 8),
+                          child: Icon(
+                            Icons.add,
+                            color: Color(0xff4ECB71),
+                            size: 40,
+                          ),
+                          alignment: Alignment.center,
                         ),
-                        alignment: Alignment.center,
                       ),
-                    ),
-                    SizedBox(width: 10),
-                    if (widget.boxItem.imagePath != null)
-                      Image.file(
-                        File(widget.boxItem.imagePath!),
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
-                      ),
-                  ],
+                      SizedBox(width: 10),
+                      if (widget.boxItem.imagePath != null)
+                        Image.file(
+                          File(widget.boxItem.imagePath!),
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        ),
+                    ],
+                  ),
+                ),
+              Text('가격'),
+              TextField(
+                controller: titleController,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [ThousandsSeparatorInputFormatter()],
+                decoration: InputDecoration(
+                  hintText: '가격을 입력하세요',
+                ),
+                onChanged: (value) {
+                  widget.boxItem.title = value;
+                },
+              ),
+              SizedBox(height: 8.0),
+              Text('상품 이름'),
+              TextField(
+                controller: ingredientController,
+                decoration: InputDecoration(
+                  hintText: '상품 이름을 입력하세요',
                 ),
               ),
-            Text('제목'),
-            TextField(
-              controller: titleController,
-              decoration: InputDecoration(
-                hintText: '글 제목',
-              ),
-              onChanged: (value) {
-                widget.boxItem.title = value;
-              },
-            ),
-            SizedBox(height: 8.0),
-            Text('레시피 재료'),
-            TextField(
-              controller: ingredientController,
-              decoration: InputDecoration(
-                hintText: '레시피 재료',
-              ),
-            ),
-            SizedBox(height: 8.0),
-            Text('작성 내용'),
-            SizedBox(height: 8.0),
-            Container(
-              width: 240,
-              height: 300,
-              child: TextField(
-                maxLines: null,
-                expands: true,
-                keyboardType: TextInputType.multiline,
-                controller: contentController,
-                decoration: InputDecoration(filled: true, hintText: '작성할 내용을 입력하세요.'),
-              ),
-            ),
-          ],
-        )
-            : Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: SizedBox(
-                width: 300,
+              SizedBox(height: 8.0),
+              Text('상품 설명'),
+              SizedBox(height: 8.0),
+              Container(
+                width: 240,
                 height: 300,
-                child: widget.boxItem.imagePath != null
-                    ? Image.file(
-                  File(widget.boxItem.imagePath!),
-                  fit: BoxFit.cover,
-                )
-                    : SizedBox(),
-              ),
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Image.asset(
-                      'assets/profile_image.png',
-                      width: 30.0,
-                    ),
-                    SizedBox(width: 8.0),
-                    Text(
-                      '작성자',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 19,
-                      ),
-                    ),
-                  ],
+                child: TextField(
+                  maxLines: null,
+                  expands: true,
+                  keyboardType: TextInputType.multiline,
+                  controller: contentController,
+                  decoration: InputDecoration(
+                      filled: true, hintText: '상품 설명을 입력하세요.'),
                 ),
-              ],
-            ),
-            SizedBox(height: 13),
-            Text(
-              widget.boxItem.title ?? 'Title',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
-            ),
-            SizedBox(height: 3),
-            Text(
-              '연령대',
-              style: TextStyle(fontSize: 15.0, color: Colors.grey, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Divider(),
-            SizedBox(height: 6),
-            Text('레시피 재료'),
-            Text(
-              widget.boxItem.ingredient ?? 'ingredient',
-              style: TextStyle(fontSize: 16.0),
-            ),
-            SizedBox(height: 7),
-            Divider(),
-            SizedBox(height: 8),
-            Text(
-              widget.boxItem.content ?? 'Content',
-              style: TextStyle(fontSize: 16.0),
-            ),
-          ],
+              ),
+            ],
+          )
+              : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: SizedBox(
+                  width: 300,
+                  height: 300,
+                  child: widget.boxItem.imagePath != null
+                      ? Image.file(
+                    File(widget.boxItem.imagePath!),
+                    fit: BoxFit.cover,
+                  )
+                      : SizedBox(),
+                ),
+              ),
+              SizedBox(height: 8),
+              Divider(),
+              SizedBox(height: 5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Image.asset(
+                        'assets/profile_image.png',
+                        width: 28.0,
+                      ),
+                      SizedBox(width: 8.0),
+                      Text(
+                        '사업자명',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 17,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              Divider(),
+              Text(
+                '${widget.boxItem.title ?? 'Title'} 원',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+              ),
+              SizedBox(height: 3),
+              Text(
+                widget.boxItem.ingredient ?? 'ingredient',
+                style: TextStyle(fontSize: 20.0),
+              ),
+              SizedBox(height: 4),
+              Text(
+                '종류',
+                style: TextStyle(fontSize: 15.0,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 7),
+              Divider(),
+              Text('상품 설명'),
+              SizedBox(height: 8),
+              Text(
+                widget.boxItem.content ?? 'Content',
+                style: TextStyle(fontSize: 16.0),
+              ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: !isEditing
@@ -689,36 +753,54 @@ class _DetailPageState extends State<DetailPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            SizedBox(
-              width: 43,
-              height: 43,
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+              child: Container(
+                width: 300, // 버튼의 가로 크기
+                height: 50, // 버튼의 세로 크기
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => OrderPage(cartItems: [],)),
+                    );
+                    // 주문하기 버튼이 눌렸을 때 수행할 작업 추가
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.grey[200], // 버튼의 배경색
+                  ),
+                  child: Text(
+                    '주문하기',
+                    style: TextStyle(
+                      fontSize: 20, // 버튼 내 텍스트의 폰트 크기
+                      //color: Colors.white, // 버튼 내 텍스트의 색상
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: 15), // 아이콘 버튼과 주문하기 버튼 사이 간격 조정
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
               child: IconButton(
-                onPressed: () async {
-                  final prefs = await SharedPreferences.getInstance();
-                  final key = 'liked_${widget.boxItem.id}';
-                  final alreadyLiked = prefs.getBool(key) ?? false;
-
-                  if (!alreadyLiked) {
-                    setState(() {
-                      isLiked = true;
-                      widget.boxItem.likeCount++;
-                    });
-                    prefs.setBool(key, true);
-                  } else {
-                    setState(() {
-                      isLiked = false;
-                      widget.boxItem.likeCount--;
-                    });
-                    prefs.remove(key);
-                  }
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CartPage(
+                      // 상품 정보를 전달합니다.
+                      productName: widget.boxItem.ingredient ?? '',
+                      productPrice: widget.boxItem.title ?? '',
+                    ),
+                    ),
+                  );
+                  // 장바구니 아이콘으로 바꾸기
                 },
-                icon: Icon(Icons.favorite_border),
-                iconSize: 35,
-                color: isLiked ? Colors.red : Color(0xff4ECB71),
+                icon: Icon(Icons.card_travel),
+                iconSize: 29,
+                color: Color(0xff4ECB71),
                 padding: EdgeInsets.zero,
               ),
             ),
-            Text('좋아요수: ${widget.boxItem.likeCount}'),
           ],
         ),
       )
@@ -763,198 +845,202 @@ class _WritePageState extends State<WritePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('글 작성하기'),
+        title: Text('상품정보 작성'),
       ),
 
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column( // 글 작성하기 이미지
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () async {
-                    final pickedImage = await ImagePicker().getImage(source: ImageSource.gallery);
-                    if (pickedImage != null) {
-                      // 이미지 선택 시 선택한 이미지를 저장하고 UI를 업데이트하여 이미지를 보여줌
-                      setState(() {
-                        selectedImage = File(pickedImage.path);
-                      });
-                    }
-                  },
-                  child: Container(
-                    width: 100,
-                    height: 100, // 네모난 박스의 높이
-                    color: Color(0xFFD9D9D9), // 박스의 색상
-                    margin: EdgeInsets.only(left:0, bottom: 0, right: 0), // 박스와 제목 사이의 간격
-                    child: Icon(
-                      Icons.add,
-                      color: Color(0xff4ECB71),
-                      size: 40,
-                    ),
-                    alignment: Alignment.center,
-                  ),
-                ),
-
-                SizedBox(width: 10),
-
-                // 선택한 이미지가 있을 경우 보여줌
-                if (selectedImage != null)
-                  Image.file(
-                    selectedImage!,
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  ),
-              ],
-            ),
-
-            // 글 작성하기 내용
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(height: 10.0),
-                TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    hintText: '글 제목',
-                  ),
-                ),
-                SizedBox(height: 30.0),
-                Text(
-                  "카테고리 설정",
-                  style: TextStyle(
-                      fontSize: 18
-                  ),
-                ),
-
-                SizedBox(height: 10,),
-                //카테고리 필터 메뉴 넣기
-                Row(
-                  children: [
-                    OutlinedButton(
-                      onPressed: () {
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column( // 글 작성하기 이미지
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () async {
+                      final pickedImage = await ImagePicker().getImage(source: ImageSource.gallery);
+                      if (pickedImage != null) {
+                        // 이미지 선택 시 선택한 이미지를 저장하고 UI를 업데이트하여 이미지를 보여줌
                         setState(() {
-                          if (_selectedCategory == '학생') {
-                            _selectedCategory = ''; // 선택 취소
-                          } else {
-                            _selectedCategory = '학생'; // '학생' 선택
-                          }
+                          selectedImage = File(pickedImage.path);
                         });
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          width: 1.0,
-                          color: _selectedCategory == '학생' ? Color(0xff4ECB71) : Colors.grey,
-                        ),
-                        backgroundColor: _selectedCategory == '학생' ? Color(0xff4ECB71) : Colors.transparent,
-                        padding: EdgeInsets.symmetric(horizontal: 40.0), // 좌우 여백 조절
+                      }
+                    },
+                    child: Container(
+                      width: 100,
+                      height: 100, // 네모난 박스의 높이
+                      color: Color(0xFFD9D9D9), // 박스의 색상
+                      margin: EdgeInsets.only(left:0, bottom: 0, right: 0), // 박스와 제목 사이의 간격
+                      child: Icon(
+                        Icons.add,
+                        color: Color(0xff4ECB71),
+                        size: 40,
                       ),
-                      child: Text(
-                        '학생',
-                        style: TextStyle(
-                          color: _selectedCategory == '학생' ? Colors.white : Color(0xff4ECB71), // 글자색 변경
-                        ),
-                      ),
+                      alignment: Alignment.center,
                     ),
-                    SizedBox(width: 15),
-                    OutlinedButton(
-                      onPressed: () {
-                        setState(() {
-                          if (_selectedCategory == '성인') {
-                            _selectedCategory = ''; // 선택 취소
-                          } else {
-                            _selectedCategory = '성인'; // '성인' 선택
-                          }
-                        });
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          width: 1.0,
-                          color: _selectedCategory == '성인' ? Color(0xff4ECB71) : Colors.grey,
-                        ),
-                        backgroundColor: _selectedCategory == '성인' ? Color(0xff4ECB71) : Colors.transparent,
-                        padding: EdgeInsets.symmetric(horizontal: 40.0), // 좌우 여백 조절
-                      ),
-                      child: Text(
-                        '성인',
-                        style: TextStyle(
-                          color: _selectedCategory == '성인' ? Colors.white : Color(0xff4ECB71), // 글자색 변경
-                        ),
-                      ),
+                  ),
+
+                  SizedBox(width: 10),
+
+                  // 선택한 이미지가 있을 경우 보여줌
+                  if (selectedImage != null)
+                    Image.file(
+                      selectedImage!,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
                     ),
-                  ],
-                ),
+                ],
+              ),
 
-                SizedBox(height: 20,),
-                TextField(
-                  controller: ingredientController,
-                  decoration: InputDecoration(
-                    hintText: '레시피 재료',
+              // 글 작성하기 내용
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: 10.0),
+                  TextField(
+                    controller: titleController,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [ThousandsSeparatorInputFormatter()],
+                    decoration: InputDecoration(
+                      hintText: '가격을 입력하세요',
+                    ),
                   ),
-                ),
-
-                SizedBox(height: 30,),
-                Container(
-                  width: 240,
-                  height: 220,
-                  child: TextField(
-                    maxLines: null,
-                    expands: true,
-                    keyboardType: TextInputType.multiline,
-                    controller: contentController,
-                    decoration: InputDecoration(filled: true, hintText: '작성할 내용을 입력하세요.'),
+                  SizedBox(height: 30.0),
+                  Text(
+                    "카테고리 설정",
+                    style: TextStyle(
+                        fontSize: 18
+                    ),
                   ),
-                ),
 
-                SizedBox(height: 8.0),
-                ElevatedButton(
-                  onPressed: () {
-                    // 작성 완료 버튼이 눌렸을 때만 글이 작성되도록 수정
-                    if (selectedImage == null) {
-                      // 이미지를 선택하지 않았을 때는 사용자에게 알림
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title:
-                            Text(
-                              '업로드 실패',
-                              style: TextStyle(
-                                fontSize: 20, //폰트 크기 조절
-                              ),
-                            ),
-                            content: Text('이미지를 선택해주세요.'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: Text('확인'),
-                              ),
-                            ],
-                          );
+                  SizedBox(height: 10,),
+                  //카테고리 필터 메뉴 넣기
+                  Row(
+                    children: [
+                      OutlinedButton(
+                        onPressed: () {
+                          setState(() {
+                            if (_selectedCategory == '학생') {
+                              _selectedCategory = ''; // 선택 취소
+                            } else {
+                              _selectedCategory = '학생'; // '학생' 선택
+                            }
+                          });
                         },
-                      );
-                    } else {
-                      // 이미지를 선택한 경우 작성을 완료함
-                      final postDate = DateTime.now();
-                      Navigator.pop(
-                        context,
-                        WritePageResult(
-                          title: titleController.text,
-                          ingredient: ingredientController.text,
-                          content: contentController.text,
-                          imagePath: selectedImage?.path, // 선택한 이미지의 경로를 전달
-                          postDate: postDate,
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            width: 1.0,
+                            color: _selectedCategory == '학생' ? Color(0xff4ECB71) : Colors.grey,
+                          ),
+                          backgroundColor: _selectedCategory == '학생' ? Color(0xff4ECB71) : Colors.transparent,
+                          padding: EdgeInsets.symmetric(horizontal: 40.0), // 좌우 여백 조절
                         ),
-                      );
-                    }
-                  },
-                  child: Text('작성 완료'),
-                ),
-              ],
-            ),
-          ],
+                        child: Text(
+                          '학생',
+                          style: TextStyle(
+                            color: _selectedCategory == '학생' ? Colors.white : Color(0xff4ECB71), // 글자색 변경
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 15),
+                      OutlinedButton(
+                        onPressed: () {
+                          setState(() {
+                            if (_selectedCategory == '성인') {
+                              _selectedCategory = ''; // 선택 취소
+                            } else {
+                              _selectedCategory = '성인'; // '성인' 선택
+                            }
+                          });
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            width: 1.0,
+                            color: _selectedCategory == '성인' ? Color(0xff4ECB71) : Colors.grey,
+                          ),
+                          backgroundColor: _selectedCategory == '성인' ? Color(0xff4ECB71) : Colors.transparent,
+                          padding: EdgeInsets.symmetric(horizontal: 40.0), // 좌우 여백 조절
+                        ),
+                        child: Text(
+                          '성인',
+                          style: TextStyle(
+                            color: _selectedCategory == '성인' ? Colors.white : Color(0xff4ECB71), // 글자색 변경
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 20,),
+                  TextField(
+                    controller: ingredientController,
+                    decoration: InputDecoration(
+                      hintText: '상품 이름을 입력하세요',
+                    ),
+                  ),
+
+                  SizedBox(height: 30,),
+                  Container(
+                    width: 240,
+                    height: 220,
+                    child: TextField(
+                      maxLines: null,
+                      expands: true,
+                      keyboardType: TextInputType.multiline,
+                      controller: contentController,
+                      decoration: InputDecoration(filled: true, hintText: '상품 설명을 입력하세요.'),
+                    ),
+                  ),
+
+                  SizedBox(height: 8.0),
+                  ElevatedButton(
+                    onPressed: () {
+                      // 작성 완료 버튼이 눌렸을 때만 글이 작성되도록 수정
+                      if (selectedImage == null) {
+                        // 이미지를 선택하지 않았을 때는 사용자에게 알림
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title:
+                              Text(
+                                '업로드 실패',
+                                style: TextStyle(
+                                  fontSize: 20, //폰트 크기 조절
+                                ),
+                              ),
+                              content: Text('이미지를 선택해주세요.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: Text('확인'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      } else {
+                        // 이미지를 선택한 경우 작성을 완료함
+                        final postDate = DateTime.now();
+                        Navigator.pop(
+                          context,
+                          WritePageResult(
+                            title: titleController.text,
+                            ingredient: ingredientController.text,
+                            content: contentController.text,
+                            imagePath: selectedImage?.path, // 선택한 이미지의 경로를 전달
+                            postDate: postDate,
+                          ),
+                        );
+                      }
+                    },
+                    child: Text('작성 완료'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1178,7 +1264,7 @@ class _RecipeSearchPageState extends State<RecipeSearchPage> {
       } else {
         // 검색어가 포함된 박스만 필터링하여 보여줍니다.
         filteredBoxList = boxList.where((box) =>
-            box.title!.toLowerCase().contains(query.toLowerCase())).toList();
+            box.ingredient!.toLowerCase().contains(query.toLowerCase())).toList();
       }
     });
   }
@@ -1227,10 +1313,10 @@ class _RecipeSearchPageState extends State<RecipeSearchPage> {
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 2.0, // 박스 간의 상하 간격
-                      crossAxisSpacing: 0.0, // 박스 간의 좌우 간격
-                      childAspectRatio: 0.46,
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 3.0, // 박스 간의 상하 간격
+                      crossAxisSpacing: 1.0, // 박스 간의 좌우 간격
+                      childAspectRatio: 0.59,
                     ),
                     itemCount: filteredBoxList.length,
                     itemBuilder: (BuildContext context, int index) {
@@ -1239,29 +1325,28 @@ class _RecipeSearchPageState extends State<RecipeSearchPage> {
                           final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  DetailPage(
-                                    boxItem: boxList[index],
-                                    boxIndex: index,
-                                    onDelete: (deletedBox) {
-                                      setState(() {
-                                        boxList.remove(deletedBox);
-                                        saveBoxList(); // 삭제 후 상태를 저장
-                                        filteredBoxList = List.from(boxList); // 수정된 boxList로 filteredBoxList 업데이트
-                                      });
-                                      Navigator.pop(context); // 상세 페이지 닫기
-                                      _refreshData();
-                                    },
-                                    onEdit: (editedBox, index) {
-                                      setState(() {
-                                        boxList[index] = editedBox;
-                                        saveBoxList();
-                                        filteredBoxList = List.from(boxList); // 수정된 boxList로 filteredBoxList 업데이트
-                                      });
-                                      Navigator.pop(context);
-                                      _refreshData();
-                                    }, boxList: [],
-                                  ),
+                              builder: (context) => DetailPage(
+                                boxItem:filteredBoxList[index],
+                                boxIndex: index,
+                                onDelete: (deletedBox) {
+                                  setState(() {
+                                    boxList.remove(deletedBox);
+                                    saveBoxList(); // 삭제 후 상태를 저장
+                                    filteredBoxList = List.from(boxList); // 수정된 boxList로 filteredBoxList 업데이트
+                                  });
+                                  Navigator.pop(context); // 상세 페이지 닫기
+                                  _refreshData();
+                                },
+                                onEdit: (editedBox, index) {
+                                  setState(() {
+                                    boxList[index] = editedBox;
+                                    saveBoxList();
+                                    filteredBoxList = List.from(boxList); // 수정된 boxList로 filteredBoxList 업데이트
+                                  });
+                                  Navigator.pop(context);
+                                  _refreshData();
+                                }, boxList: [],
+                              ),
                             ),
                           );
                           if (result != null && result is WritePageResult) {
@@ -1299,7 +1384,7 @@ class _RecipeSearchPageState extends State<RecipeSearchPage> {
                               Stack(
                                 children: [
                                   AspectRatio(
-                                    aspectRatio: 10.5 / 13.0,
+                                    aspectRatio: 9.1 / 8.5,
                                     child: filteredBoxList[index].imagePath != null
                                         ? Image.file(
                                       File(filteredBoxList[index].imagePath!),
@@ -1310,33 +1395,42 @@ class _RecipeSearchPageState extends State<RecipeSearchPage> {
                                       fit: BoxFit.cover,
                                     ),
                                   ),
-                                  Positioned(
-                                    top: -6.0,
-                                    left: 8.0,
-                                    child: Row(
-                                      children: [
-                                        Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                                          child: Text(
-                                            '연령대',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
+                                  Row(
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.fromLTRB(10.5, 0, 0, 148),
+                                        child: Text(
+                                          '종류',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
                                           ),
                                         ),
-                                        SizedBox(width: 50.0),
-                                        IconButton(
+                                      ),
+                                      SizedBox(width: 50.0),
+                                      Padding(
+                                        padding: EdgeInsets.fromLTRB(69.5, 137, 0, 0),
+                                        child: IconButton(
                                           onPressed: () {
-                                            // 장바구니 아이콘 넣기
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => CartPage(
+                                                // 상품 정보를 전달합니다.
+                                                productName: boxList[index].ingredient ?? '',
+                                                productPrice: boxList[index].title ?? '',
+                                              ),
+                                              ),
+                                            );
+                                            // 장바구니 아이콘으로 바꾸기
                                           },
-                                          icon: Icon(Icons.bookmark_border),
+                                          icon: Icon(Icons.card_travel),
                                           iconSize: 29,
                                           color: Color(0xff4ECB71),
                                           padding: EdgeInsets.zero,
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -1351,54 +1445,77 @@ class _RecipeSearchPageState extends State<RecipeSearchPage> {
                                       const SizedBox(height: 2.0),
                                       Row(
                                         children: [
-                                          Image.asset(
-                                            'assets/profile_image.png',
-                                            width: 22.0,
+                                          Padding(
+                                            padding:EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                            child: Image.asset(
+                                              'assets/profile_image.png',
+                                              width: 22.0,
+                                            ),
                                           ),
-                                          SizedBox(width: 3.0),
-                                          Text(
-                                            '작성자',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 12),
+                                          Padding(
+                                            padding: EdgeInsets.fromLTRB(4, 0, 0, 0),
+                                            child:  Text(
+                                              '사업자명',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12),
+                                            ),
                                           ),
                                         ],
                                       ),
+                                      // 가격 표시
+                                      const SizedBox(height: 5.0),
+                                      Padding(
+                                        padding:EdgeInsets.fromLTRB(2, 0, 0, 0),
+                                        child:Text(
+                                          '${filteredBoxList[index].title ?? 'Title'} 원',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 17),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
                                       //글 제목(기본페이지)
-                                      const SizedBox(height: 9.0),
-                                      Text(
-                                        filteredBoxList[index].title ?? 'Title',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
+                                      const SizedBox(height: 0.0),
+
+                                      Padding(
+                                        padding:EdgeInsets.fromLTRB(2, 0, 0, 0),
+                                        child:Text(
+                                          '${filteredBoxList[index].ingredient ?? 'ingredient'}',
+                                          style: TextStyle(
+                                              fontSize: 18),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
                               Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsets.only(bottom: 0.0),
-                                    child: IconButton(
-                                      onPressed: () {
-                                        // 좌측 하단 아이콘 동작
-                                      },
-                                      icon: Icon(Icons.favorite_border), //좋아요
-                                      iconSize: 20,
-                                      color: Color(0xff4ECB71),
-                                      padding: EdgeInsets.zero,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        bottom: 0.0, top: 1.3, left: 9),
-                                    child: Image.asset(
-                                      'assets/comment_image.png', //댓글
-                                      fit: BoxFit.cover,
-                                      width: 16.0,
+                                    padding: EdgeInsets.fromLTRB(0, 0, 0, 5),
+                                    child: Container(
+                                      width: 199, // 버튼의 가로 크기
+                                      height: 50, // 버튼의 세로 크기
+                                      child: TextButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(builder: (context) => OrderPage(cartItems: [],)),
+                                          );
+                                          // 주문하기 버튼이 눌렸을 때 수행할 작업 추가
+                                        },
+                                        child: Text(
+                                          '주문하기',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -1421,6 +1538,10 @@ class _RecipeSearchPageState extends State<RecipeSearchPage> {
 
 //주문하기 페이지
 class OrderPage extends StatefulWidget {
+  final List<CartItem> cartItems; // 선택한 목록을 전달받음
+
+  OrderPage({required this.cartItems});
+
   @override
   _OrderPageState createState() => _OrderPageState();
 }
@@ -1452,13 +1573,25 @@ class _OrderPageState extends State<OrderPage> {
                 ),
                 TextButton(
                   onPressed: () {
-                    // 배송지 선택 창으로 이동하는 동작 구현
+                    // 배송지 선택 페이지를 열고 주소를 가져와 shippingAddress에 저장
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ShippingAddressPage(
+                          onAddressSelected: (name, phoneNumber, address) {
+                            setState(() {
+                              shippingAddress = '$name\n$phoneNumber\n$address';
+                            });
+                          },
+                        ),
+                      ),
+                    );
                   },
                   child: Text('배송지 선택'),
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 50),
             Text(
               '결제수단',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -1499,11 +1632,58 @@ class _OrderPageState extends State<OrderPage> {
               ],
             ),
             Spacer(),
+
+            // 결제하기 버튼
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // 결제하기 동작 구현
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('결제 확인'),
+                        content: Text('정말로 결제하시겠습니까?'),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(false); // 취소 버튼을 누른 경우, false 반환
+                            },
+                            child: Text('취소'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(true); // 확인 버튼을 누른 경우, true 반환
+                            },
+                            child: Text('확인'),
+                          ),
+                        ],
+                      );
+                    },
+                  ).then((confirmed) {
+                    if (confirmed != null && confirmed) {
+                      // 확인 버튼을 누른 경우, 결제가 완료되었음을 알림
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('결제 완료'),
+                            content: Text('결제가 완료되었습니다.'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(true); // 결제 완료를 알리면서 주문 페이지를 닫음
+                                  // 주문 페이지(OrderPage)에서 결제가 완료된 항목들을 반환합니다.
+                                  Navigator.of(context).pop(widget.cartItems.where((item) => item.isSelected).toList());
+                                },
+                                child: Text('확인'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+                  });
                 },
                 child: Text('결제하기'),
               ),
@@ -1518,28 +1698,92 @@ class _OrderPageState extends State<OrderPage> {
 //장바구니 페이지 만들기
 class CartItem {
   final String name;
-  final double price;
+  final int price;
   bool isSelected;
 
   CartItem({required this.name, required this.price, this.isSelected = false});
 }
 
 class CartPage extends StatefulWidget {
+  final String productName;
+  final String productPrice;
+
+  CartPage({required this.productName, required this.productPrice});
+
   @override
   _CartPageState createState() => _CartPageState();
 }
 
 class _CartPageState extends State<CartPage> {
-  List<CartItem> cartItems = [
-    CartItem(name: '상품 1', price: 10000),
-    CartItem(name: '상품 2', price: 20000),
-    CartItem(name: '상품 3', price: 15000),
-  ];
+  List<CartItem> cartItems = [];
+  List<BoxItem> boxList = [];
   bool isAllSelected = false;
 
   @override
+  void initState() {
+    super.initState();
+    _loadCartItems();
+    _addToCart(widget.productName, widget.productPrice); // 새로운 데이터 추가
+
+
+  }
+
+
+  // 장바구니 항목을 로드합니다.
+  void _loadCartItems() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? cartItemsJson = prefs.getString('cartItems');
+    if (cartItemsJson != null) {
+      List<dynamic> decodedItems = json.decode(cartItemsJson);
+      List<CartItem> loadedItems = decodedItems
+          .map((item) => CartItem(
+        name: item['name'],
+        price: item['price'],
+        isSelected: item['isSelected'],
+      ))
+          .toList();
+      setState(() {
+        cartItems.addAll(loadedItems);
+      });
+    }
+  }
+
+
+  // 장바구니 항목을 저장합니다.
+  void _saveCartItems() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<Map<String, dynamic>> encodedItems = cartItems
+        .map((item) => {
+      'name': item.name,
+      'price': item.price,
+      'isSelected': item.isSelected,
+    })
+        .toList();
+    String cartItemsJson = json.encode(encodedItems);
+    prefs.setString('cartItems', cartItemsJson);
+  }
+
+  // 장바구니에 항목을 추가합니다.
+  void _addToCart(String? productName, String? productPrice) {
+    if (productName != null && productPrice != null) {
+      int? price = int.tryParse(productPrice.replaceAll(',', ''));
+      if (price != null) {
+        setState(() {
+          cartItems.add(CartItem(name: productName, price: price));
+          _saveCartItems();
+        });
+      } else {
+        print('Failed to parse price');
+      }
+    } else {
+      print('Product name or price is null');
+    }
+  }
+
+
+  @override
   Widget build(BuildContext context) {
-    double total = 0;
+    int total = 0;
 
     //상품 가격 합계
     cartItems.forEach((item) {
@@ -1569,7 +1813,16 @@ class _CartPageState extends State<CartPage> {
                     },
                   ),
                   title: Text(cartItems[index].name),
-                  subtitle: Text('${cartItems[index].price} 원'),
+                  subtitle: Text('${NumberFormat.currency(locale: 'ko_KR', symbol: '').format(cartItems[index].price)} 원'),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () {
+                      setState(() {
+                        cartItems.removeAt(index);
+                        _saveCartItems();
+                      });
+                    },
+                  ),
                 );
               },
             ),
@@ -1596,7 +1849,7 @@ class _CartPageState extends State<CartPage> {
                   ],
                 ),
                 Text(
-                  '합계: $total 원',
+                  '합계: ${NumberFormat.currency(locale: 'ko_KR', symbol: '').format(total)} 원',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -1606,9 +1859,22 @@ class _CartPageState extends State<CartPage> {
             padding: const EdgeInsets.all(16.0),
             child: SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child:ElevatedButton(
                 onPressed: () {
-                  // 결제하기 동작 구현
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => OrderPage(cartItems: cartItems), // 선택한 목록을 주문하기 페이지로 전달
+                    ),
+                  ).then((completedItems) {
+                    if (completedItems != null && completedItems.isNotEmpty) {
+                      // 결제가 완료된 항목들을 장바구니에서 제거
+                      setState(() {
+                        cartItems.removeWhere((item) => completedItems.contains(item));
+                        _saveCartItems(); // 변경된 장바구니 목록을 저장
+                      });
+                    }
+                  });
                 },
                 child: Text('결제하기'),
               ),
@@ -1616,6 +1882,133 @@ class _CartPageState extends State<CartPage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+//배송지 선택 페이지
+class ShippingAddressPage extends StatefulWidget {
+  final Function(String, String, String) onAddressSelected;
+
+  ShippingAddressPage({required this.onAddressSelected});
+
+  @override
+  _ShippingAddressPageState createState() => _ShippingAddressPageState();
+}
+
+class _ShippingAddressPageState extends State<ShippingAddressPage> {
+  late TextEditingController _nameController;
+  late TextEditingController _phoneNumberController;
+  late TextEditingController _addressController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+    _phoneNumberController = TextEditingController();
+    _addressController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneNumberController.dispose();
+    _addressController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('배송지 선택'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '이름',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                hintText: '이름을 입력해주세요',
+              ),
+            ),
+            SizedBox(height: 20),
+            Text(
+              '전화번호',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            TextField(
+              controller: _phoneNumberController,
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(
+                hintText: '전화번호를 입력해주세요',
+              ),
+              onChanged: (String value) {
+                if (value.length == 3 || value.length == 8) {
+                  // 번호 입력에 따라 '-'를 자동으로 추가
+                  _phoneNumberController.text = '$value-';
+                  _phoneNumberController.selection = TextSelection.fromPosition(
+                    TextPosition(offset: _phoneNumberController.text.length),
+                  );
+                }
+              },
+            ),
+            SizedBox(height: 20),
+            Text(
+              '주소',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            TextField(
+              controller: _addressController,
+              decoration: InputDecoration(
+                hintText: '주소를 입력해주세요',
+              ),
+            ),
+            Spacer(),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  // 입력된 정보를 가져와서 부모 위젯으로 전달하고 페이지 닫기
+                  String name = _nameController.text;
+                  String phoneNumber = _phoneNumberController.text;
+                  String address = _addressController.text;
+                  widget.onAddressSelected(name, phoneNumber, address);
+                  Navigator.pop(context);
+                },
+                child: Text('주소 선택 완료'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// 입력시 쉼표 자동 추가
+class ThousandsSeparatorInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    final double value = double.parse(newValue.text.replaceAll(',', ''));
+    final String newText = NumberFormat('#,###').format(value);
+
+    return TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: newText.length),
     );
   }
 }
