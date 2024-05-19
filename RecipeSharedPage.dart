@@ -93,6 +93,23 @@ class BoxItem {
     List<String>? comments, // Nullable 댓글 목록
   }) : comments = comments ?? []; // 댓글 목록 초기화
 
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(title ?? ''),
+      subtitle: Text(content ?? ''),
+      leading: Icon(Icons.bookmark_border),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => StoragePage(boxItem: this), // 박스 정보를 저장하기 페이지로 전달
+          ),
+        );
+      },
+    );
+  }
+
   // JSON 데이터를 BoxItem 객체로 변환하는 메서드
   factory BoxItem.fromJson(Map<String, dynamic> json) {
     return BoxItem(
@@ -127,6 +144,14 @@ class BoxListProvider extends ChangeNotifier {
     _boxList = newList;
     notifyListeners(); // 상태가 변경됨을 Provider에 알림
   }
+  // 좋아요 버튼 누를 때 호출되는 메서드
+  void toggleLike(BoxItem boxItem) {
+    final index = _boxList.indexWhere((element) => element.id == boxItem.id);
+    if (index != -1) {
+      _boxList[index].likeCount++; // 좋아요 수 증가
+      notifyListeners(); // UI 업데이트를 위해 리스너에 알림
+    }
+  }
 }
 
 //레시피 공유게시판 메인
@@ -138,6 +163,17 @@ class BoxGrid extends StatefulWidget {
 class _BoxGridState extends State<BoxGrid> {
   List<BoxItem> boxList = [];
   //여러 BoxItem 객체들을 담는 리스트인 boxList를 선언
+
+  /* // Method to handle adding comments to BoxItem
+  void addCommentToBoxItem(BoxItem boxItem, String comment) {
+    final index = boxList.indexOf(boxItem);
+    if (index != -1) {
+      setState(() {
+        boxList[index].comments.add(comment);
+        saveBoxList();
+      });
+    }
+  }*/
 
   // 앱 시작시 데이터 로드
   @override
@@ -166,6 +202,13 @@ class _BoxGridState extends State<BoxGrid> {
     final boxListJson = json.encode(boxList.map((e) => e.toJson()).toList());
     await prefs.setString('boxList', boxListJson);
   }
+
+  /* // 작성된 지 24시간이 지났는지 여부를 판단하는 함수
+  bool isPast24Hours(DateTime postDateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(postDateTime);
+    return difference.inHours >= 24;
+  } */
 
   Future<void> _refreshData() async {
     // 여기서 필터링된 목록을 다시 계산하고 업데이트합니다.
@@ -250,7 +293,7 @@ class _BoxGridState extends State<BoxGrid> {
                               final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => DetailPage( //해당 페이지에서 게시물 페이지로 이동시에 작업
+                                  builder: (context) => DetailPage( //게시물 페이지로 이동시에 작업
                                     boxItem: boxList[index],
                                     boxIndex: index,
                                     onDelete: (deletedBox) { //편집모드 삭제
@@ -407,24 +450,47 @@ class _BoxGridState extends State<BoxGrid> {
                                   Row(
                                     children: [
                                       Padding(
-                                        padding: const EdgeInsets.only(bottom: 0.0),
-                                        child: IconButton(
-                                          onPressed: () {
-                                            // 좌측 하단 아이콘 동작
-                                          },
-                                          icon: Icon(Icons.favorite_border), //좋아요 버튼
-                                          iconSize: 20,
-                                          color: Color(0xff4ECB71),
-                                          padding: EdgeInsets.zero,
+                                        padding: const EdgeInsets.fromLTRB(5, 0, 0, 10),
+                                        child: Row(
+                                          children: [
+                                            SizedBox(
+                                              width: 30,
+                                              height: 30,
+                                              child: Icon(
+                                                Icons.favorite_border, // 좋아요 버튼
+                                                size: 20.1,
+                                                color: Color(0xff4ECB71),
+                                              ),
+                                            ),
+                                            Text('${boxList[index].likeCount}'), // 좋아요 수 표시
+                                          ],
                                         ),
                                       ),
+
+                                      SizedBox(width: 5),
                                       Padding(
-                                        padding: const EdgeInsets.only(
-                                            bottom: 0.0, top: 1.3, left: 9),
-                                        child: Image.asset(
-                                          'assets/comment_image.png', //댓글 버튼(이미지)
-                                          fit: BoxFit.cover,
-                                          width: 16.0,
+                                        padding: const EdgeInsets.fromLTRB(5, 1, 0, 10),
+                                        child: Row(
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.fromLTRB(0, 0, 0, 2.1),
+                                              child:  SizedBox(
+                                                width: 30,
+                                                height: 30,
+                                                child: Icon(
+                                                  Comment.customicons, // 댓글 버튼
+                                                  size: 17.2,
+                                                  color: Color(0xff4ECB71),
+                                                ),
+                                              ),
+                                            ),
+
+                                            SizedBox(width: 1),
+                                            Padding(
+                                              padding: EdgeInsets.fromLTRB(0, 0, 0, 1.5),
+                                              child: Text('${boxList[index].likeCount}'), // 댓글 수 표시로 수정하기
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
@@ -820,7 +886,7 @@ class _DetailPageState extends State<DetailPage> {
                     ),
                   );
                 },
-                icon: Icon(Icons.comment),
+                icon:Icon(Comment.customicons),
                 iconSize: 30,
                 color: Color(0xff4ECB71),
                 padding: EdgeInsets.only(top: 2),
@@ -881,192 +947,194 @@ class _WritePageState extends State<WritePage> {
         title: Text('글 작성하기'),
       ),
 
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column( // 글 작성하기 이미지
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () async {
-                    final pickedImage = await ImagePicker().getImage(source: ImageSource.gallery);
-                    if (pickedImage != null) {
-                      // 이미지 선택 시 선택한 이미지를 저장하고 UI를 업데이트하여 이미지를 보여줌
-                      setState(() {
-                        selectedImage = File(pickedImage.path);
-                      });
-                    }
-                  },
-                  child: Container(
-                    width: 100,
-                    height: 100, // 네모난 박스의 높이
-                    color: Color(0xFFD9D9D9), // 박스의 색상
-                    margin: EdgeInsets.only(left:0, bottom: 0, right: 0), // 박스와 제목 사이의 간격
-                    child: Icon(
-                      Icons.add,
-                      color: Color(0xff4ECB71),
-                      size: 40,
-                    ),
-                    alignment: Alignment.center,
-                  ),
-                ),
-                SizedBox(width: 10),
-                // 선택한 이미지가 있을 경우 보여줌
-                if (selectedImage != null)
-                  Image.file(
-                    selectedImage!,
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  ),
-              ],
-            ),
-
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(height: 10.0),
-                TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    hintText: '글 제목',
-                  ),
-                ),
-                SizedBox(height: 30.0),
-                Text(
-                  "카테고리 설정",
-                  style: TextStyle(
-                      fontSize: 18
-                  ),
-                ),
-
-                SizedBox(height: 10,),
-                //카테고리 필터 메뉴 넣기
-                Row(
-                  children: [
-                    OutlinedButton( // 학생, 성인 버튼 동작
-                      onPressed: () {
+      body: SingleChildScrollView(
+        child:  Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column( // 글 작성하기 이미지
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () async {
+                      final pickedImage = await ImagePicker().getImage(source: ImageSource.gallery);
+                      if (pickedImage != null) {
+                        // 이미지 선택 시 선택한 이미지를 저장하고 UI를 업데이트하여 이미지를 보여줌
                         setState(() {
-                          if (_selectedCategory == '학생') {
-                            _selectedCategory = ''; // 선택 취소
-                          } else {
-                            _selectedCategory = '학생'; // '학생' 선택
-                          }
+                          selectedImage = File(pickedImage.path);
                         });
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          width: 1.0,
-                          color: _selectedCategory == '학생' ? Color(0xff4ECB71) : Colors.grey,
-                        ),
-                        backgroundColor: _selectedCategory == '학생' ? Color(0xff4ECB71) : Colors.transparent,
-                        padding: EdgeInsets.symmetric(horizontal: 40.0), // 좌우 여백 조절
+                      }
+                    },
+                    child: Container(
+                      width: 100,
+                      height: 100, // 네모난 박스의 높이
+                      color: Color(0xFFD9D9D9), // 박스의 색상
+                      margin: EdgeInsets.only(left:0, bottom: 0, right: 0), // 박스와 제목 사이의 간격
+                      child: Icon(
+                        Icons.add,
+                        color: Color(0xff4ECB71),
+                        size: 40,
                       ),
-                      child: Text(
-                        '학생',
-                        style: TextStyle(
-                          color: _selectedCategory == '학생' ? Colors.white : Color(0xff4ECB71), // 글자색 변경
-                        ),
-                      ),
+                      alignment: Alignment.center,
                     ),
-                    SizedBox(width: 15),
-                    OutlinedButton(
-                      onPressed: () {
-                        setState(() {
-                          if (_selectedCategory == '성인') {
-                            _selectedCategory = ''; // 선택 취소
-                          } else {
-                            _selectedCategory = '성인'; // '성인' 선택
-                          }
-                        });
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          width: 1.0,
-                          color: _selectedCategory == '성인' ? Color(0xff4ECB71) : Colors.grey,
-                        ),
-                        backgroundColor: _selectedCategory == '성인' ? Color(0xff4ECB71) : Colors.transparent,
-                        padding: EdgeInsets.symmetric(horizontal: 40.0), // 좌우 여백 조절
-                      ),
-                      child: Text(
-                        '성인',
-                        style: TextStyle(
-                          color: _selectedCategory == '성인' ? Colors.white : Color(0xff4ECB71), // 글자색 변경
-                        ),
-                      ),
+                  ),
+                  SizedBox(width: 10),
+                  // 선택한 이미지가 있을 경우 보여줌
+                  if (selectedImage != null)
+                    Image.file(
+                      selectedImage!,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
                     ),
-                  ],
-                ),
+                ],
+              ),
 
-                SizedBox(height: 20,),
-                TextField(
-                  controller: ingredientController,
-                  decoration: InputDecoration(
-                    hintText: '레시피 재료',
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: 10.0),
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      hintText: '글 제목',
+                    ),
                   ),
-                ),
-
-                SizedBox(height: 30,),
-                Container(
-                  width: 240, // TextField width
-                  height: 220, // TextField height
-                  child: TextField(
-                    maxLines: null,
-                    expands: true,
-                    keyboardType: TextInputType.multiline,
-                    controller: contentController,
-                    decoration: InputDecoration(filled: true, hintText: '작성할 내용을 입력하세요.'),
+                  SizedBox(height: 30.0),
+                  Text(
+                    "카테고리 설정",
+                    style: TextStyle(
+                        fontSize: 18
+                    ),
                   ),
-                ),
 
-                SizedBox(height: 8.0),
-                ElevatedButton(
-                  onPressed: () {
-                    // 작성 완료 버튼이 눌렸을 때만 글이 작성되도록 수정
-                    if (selectedImage == null) {
-                      // 이미지를 선택하지 않았을 때는 사용자에게 알림
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title:
-                            Text(
-                              '업로드 실패',
-                              style: TextStyle(
-                                fontSize: 20, //폰트 크기 조절
-                              ),
-                            ),
-                            content: Text('이미지를 선택해주세요.'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: Text('확인'),
-                              ),
-                            ],
-                          );
+                  SizedBox(height: 10,),
+                  //카테고리 필터 메뉴 넣기
+                  Row(
+                    children: [
+                      OutlinedButton( // 학생, 성인 버튼 동작
+                        onPressed: () {
+                          setState(() {
+                            if (_selectedCategory == '학생') {
+                              _selectedCategory = ''; // 선택 취소
+                            } else {
+                              _selectedCategory = '학생'; // '학생' 선택
+                            }
+                          });
                         },
-                      );
-                    } else {
-                      // 이미지를 선택한 경우 작성 완료함
-                      final postDate = DateTime.now();
-                      Navigator.pop(
-                        context,
-                        WritePageResult(
-                          title: titleController.text,
-                          ingredient: ingredientController.text,
-                          content: contentController.text,
-                          imagePath: selectedImage?.path, // 선택한 이미지의 경로를 전달함
-                          postDate: postDate,
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            width: 1.0,
+                            color: _selectedCategory == '학생' ? Color(0xff4ECB71) : Colors.grey,
+                          ),
+                          backgroundColor: _selectedCategory == '학생' ? Color(0xff4ECB71) : Colors.transparent,
+                          padding: EdgeInsets.symmetric(horizontal: 40.0), // 좌우 여백 조절
                         ),
-                      );
-                    }
-                  },
-                  child: Text('작성 완료'),
-                ),
-              ],
-            ),
-          ],
+                        child: Text(
+                          '학생',
+                          style: TextStyle(
+                            color: _selectedCategory == '학생' ? Colors.white : Color(0xff4ECB71), // 글자색 변경
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 15),
+                      OutlinedButton(
+                        onPressed: () {
+                          setState(() {
+                            if (_selectedCategory == '성인') {
+                              _selectedCategory = ''; // 선택 취소
+                            } else {
+                              _selectedCategory = '성인'; // '성인' 선택
+                            }
+                          });
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            width: 1.0,
+                            color: _selectedCategory == '성인' ? Color(0xff4ECB71) : Colors.grey,
+                          ),
+                          backgroundColor: _selectedCategory == '성인' ? Color(0xff4ECB71) : Colors.transparent,
+                          padding: EdgeInsets.symmetric(horizontal: 40.0), // 좌우 여백 조절
+                        ),
+                        child: Text(
+                          '성인',
+                          style: TextStyle(
+                            color: _selectedCategory == '성인' ? Colors.white : Color(0xff4ECB71), // 글자색 변경
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 20,),
+                  TextField(
+                    controller: ingredientController,
+                    decoration: InputDecoration(
+                      hintText: '레시피 재료',
+                    ),
+                  ),
+
+                  SizedBox(height: 30,),
+                  Container(
+                    width: 240, // TextField width
+                    height: 220, // TextField height
+                    child: TextField(
+                      maxLines: null,
+                      expands: true,
+                      keyboardType: TextInputType.multiline,
+                      controller: contentController,
+                      decoration: InputDecoration(filled: true, hintText: '작성할 내용을 입력하세요.'),
+                    ),
+                  ),
+
+                  SizedBox(height: 8.0),
+                  ElevatedButton(
+                    onPressed: () {
+                      // 작성 완료 버튼이 눌렸을 때만 글이 작성되도록 수정
+                      if (selectedImage == null) {
+                        // 이미지를 선택하지 않았을 때는 사용자에게 알림
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title:
+                              Text(
+                                '업로드 실패',
+                                style: TextStyle(
+                                  fontSize: 20, //폰트 크기 조절
+                                ),
+                              ),
+                              content: Text('이미지를 선택해주세요.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: Text('확인'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      } else {
+                        // 이미지를 선택한 경우 작성 완료함
+                        final postDate = DateTime.now();
+                        Navigator.pop(
+                          context,
+                          WritePageResult(
+                            title: titleController.text,
+                            ingredient: ingredientController.text,
+                            content: contentController.text,
+                            imagePath: selectedImage?.path, // 선택한 이미지의 경로를 전달함
+                            postDate: postDate,
+                          ),
+                        );
+                      }
+                    },
+                    child: Text('작성 완료'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1236,6 +1304,10 @@ class _FilterPageState extends State<FilterPage> {
 
 //저장하기 페이지
 class StoragePage extends StatefulWidget {
+  final BoxItem? boxItem;
+
+  StoragePage({Key? key, this.boxItem}) : super(key: key);
+
   @override
   _StoragePageState createState() => _StoragePageState();
 }
@@ -1298,12 +1370,17 @@ class _StoragePageState extends State<StoragePage> {
               itemCount: folders.length,
               itemBuilder: (BuildContext context, int index) {
                 return GridTile(
-                  child: Container(
-                    color: Colors.grey[300],
-                    child: Center(
-                      child: Text(
-                        folders[index],
-                        style: TextStyle(fontSize: 20),
+                  child: GestureDetector(
+                    onTap: (){
+                      _saveToFolder(folders[index]);
+                    },
+                    child: Container(
+                      color: Colors.grey[300],
+                      child: Center(
+                        child: Text(
+                          folders[index],
+                          style: TextStyle(fontSize: 20),
+                        ),
                       ),
                     ),
                   ),
@@ -1314,6 +1391,11 @@ class _StoragePageState extends State<StoragePage> {
         ),
       ),
     );
+  }
+  // 폴더에 박스 저장
+  void _saveToFolder(String? folderName) {
+
+    // 선택한 폴더에 박스를 추가하는 코드 작성
   }
 
   // 폴더 추가 다이얼로그 표시
@@ -1392,6 +1474,13 @@ class _RecipeSearchPageState extends State<RecipeSearchPage> {
       });
     }
   }
+
+  /* // 작성된 지 24시간이 지났는지 여부를 판단하는 함수
+  bool isPast24Hours(DateTime postDateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(postDateTime);
+    return difference.inHours >= 24;
+  } */
 
   Future<void> saveBoxList() async {
     final prefs = await SharedPreferences.getInstance();
@@ -1475,9 +1564,10 @@ class _RecipeSearchPageState extends State<RecipeSearchPage> {
                           final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => DetailPage( //해당 페이지에서 상세(게시물) 페이지로 이동
+                              builder: (context) =>
+                                  DetailPage(
                                     boxItem: boxList[index],
-                                    boxIndex: index,
+                                    boxIndex: index, // Pass the box index
                                     onDelete: (deletedBox) {
                                       setState(() {
                                         boxList.remove(deletedBox);
@@ -1631,24 +1721,47 @@ class _RecipeSearchPageState extends State<RecipeSearchPage> {
                               Row(
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsets.only(bottom: 0.0),
-                                    child: IconButton(
-                                      onPressed: () {
-                                        // 좌측 하단 아이콘 동작
-                                      },
-                                      icon: Icon(Icons.favorite_border), //좋아요
-                                      iconSize: 20,
-                                      color: Color(0xff4ECB71),
-                                      padding: EdgeInsets.zero,
+                                    padding: const EdgeInsets.fromLTRB(5, 0, 0, 10),
+                                    child: Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 30,
+                                          height: 30,
+                                          child: Icon(
+                                            Icons.favorite_border, // 좋아요 버튼
+                                            size: 20.1,
+                                            color: Color(0xff4ECB71),
+                                          ),
+                                        ),
+                                        Text('${boxList[index].likeCount}'), // 좋아요 수 표시
+                                      ],
                                     ),
                                   ),
+
+                                  SizedBox(width: 5),
                                   Padding(
-                                    padding: const EdgeInsets.only(
-                                        bottom: 0.0, top: 1.3, left: 9),
-                                    child: Image.asset(
-                                      'assets/comment_image.png', //댓글
-                                      fit: BoxFit.cover,
-                                      width: 16.0,
+                                    padding: const EdgeInsets.fromLTRB(5, 1, 0, 10),
+                                    child: Row(
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.fromLTRB(0, 0, 0, 2.1),
+                                          child:  SizedBox(
+                                            width: 30,
+                                            height: 30,
+                                            child: Icon(
+                                              Comment.customicons, // 댓글 버튼
+                                              size: 17.2,
+                                              color: Color(0xff4ECB71),
+                                            ),
+                                          ),
+                                        ),
+
+                                        SizedBox(width: 1),
+                                        Padding(
+                                          padding: EdgeInsets.fromLTRB(0, 0, 0, 1.5),
+                                          child: Text('${boxList[index].likeCount}'), // 댓글 수 표시로 수정하기
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
