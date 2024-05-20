@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'loginpage.dart';
+import 'dietlistpage.dart';
 
 
 
@@ -14,6 +16,27 @@ class _ProfilePageState extends State<ProfilePage> {
   String passward = "passward";
   String newNickname = ''; // 새로운 닉네임을 저장할 변수
 
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNickname();
+  }
+
+  Future<void> _loadNickname() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      nickname = prefs.getString('nickname') ?? 'nickname';
+    });
+  }
+
+  Future<void> _saveNickname(String newNickname) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('nickname', newNickname);
+    setState(() {
+      nickname = newNickname;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -243,8 +266,6 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _showNicknameChangeDialog(BuildContext context) {
-
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -269,13 +290,8 @@ class _ProfilePageState extends State<ProfilePage> {
             TextButton(
               onPressed: () {
                 // 확인 버튼을 눌렀을 때 새 닉네임을 적용하고 다이얼로그 닫기
-                // 여기에 새 닉네임을 서버에 업데이트하는 로직을 추가할 수 있습니다.
+                _saveNickname(newNickname);
                 Navigator.of(context).pop();
-                print('새로운 닉네임: $newNickname');
-                nickname = newNickname;
-                setState((){
-                  nickname = newNickname;
-                });
               },
               child: Text('확인'),
             ),

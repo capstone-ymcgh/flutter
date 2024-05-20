@@ -1,17 +1,97 @@
 import 'package:flutter/material.dart';
 import 'loginpage.dart';
 
+class SignUpPage extends StatefulWidget {
+  @override
+  _SignUpPageState createState() => _SignUpPageState();
+}
 
-class SignUpPage extends StatelessWidget {
+class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController nicknameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController businessCodeController = TextEditingController();
+
+  String userType = '일반 사용자'; // 기본 사용자 유형을 '일반 사용자'로 설정
+
+  void _signUp() {
+    // 입력된 값을 가져와 변수에 저장
+    String email = emailController.text;
+    String nickname = nicknameController.text;
+    String password = passwordController.text;
+    String confirmPassword = confirmPasswordController.text;
+    String businessCode = businessCodeController.text;
+
+    // 유효성 검사
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('이메일을 입력해주세요.'),
+        ),
+      );
+      return;
+    }
+
+    if (nickname.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('닉네임을 입력해주세요.'),
+        ),
+      );
+      return;
+    }
+
+    if (password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('비밀번호를 입력해주세요.'),
+        ),
+      );
+      return;
+    }
+
+    if (confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('비밀번호 확인을 입력해주세요.'),
+        ),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('비밀번호와 비밀번호 확인이 일치하지 않습니다.'),
+        ),
+      );
+      return;
+    }
+
+    if (userType == '도매상' && businessCode.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('사업자 코드를 입력해주세요.'),
+        ),
+      );
+      return;
+    }
+
+    print('UserType: $userType, Email: $email, Nickname: $nickname, Password: $password, ConfirmPassword: $confirmPassword, BusinessCode: $businessCode');
+
+    // 모든 값이 유효한 경우, 로그인 페이지로 이동
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double paddingHeight = screenHeight * 0.1;
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -68,23 +148,40 @@ class SignUpPage extends StatelessWidget {
                 obscureText: true,
               ),
               SizedBox(height: 16.0),
-              GestureDetector(
-                onTap: () {
-                  // 입력된 값을 가져와 변수에 저장
-                  String email = emailController.text;
-                  String nickname = nicknameController.text;
-                  String password = passwordController.text;
-                  String confirmPassword = confirmPasswordController.text;
-
-                  // 여기서 입력값을 처리하는 로직을 추가할 수 있습니다.
-                  // 예를 들어, 서버로 전송하거나 폼 검증을 수행하는 등
-                  print(email +','+ nickname+',' + password+',' + confirmPassword);
-                  // 버튼을 눌렀을 때 실행되는 동작
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginPage()),
-                  );
+              DropdownButton<String>(
+                value: userType,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    userType = newValue!;
+                  });
                 },
+                items: <String>['일반 사용자', '도매상']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+              Visibility(
+                visible: userType == '도매상',
+                child: Column(
+                  children: [
+                    SizedBox(height: 16.0),
+                    TextField(
+                      controller: businessCodeController,
+                      decoration: InputDecoration(
+                        hintText: '사업자 코드',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.business),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16.0),
+              GestureDetector(
+                onTap: _signUp,
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.blue,

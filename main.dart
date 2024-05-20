@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertest/ProductOrderPage.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+
+import 'dart:convert';
 import 'dart:io';
+import 'dart:async';
 import 'loginpage.dart';
 import 'profilepage.dart';
 import 'calendarpage.dart';
+import 'dietlistpage.dart';
+import 'RecipeSharedPage.dart';
+import 'ProductOrderPage.dart';
 
 void main() {
   runApp(MyApp());
@@ -28,9 +38,10 @@ class _MyHomePageState extends State<MyHomePage> {
   DateTime? currentBackPressTime;
 
   final List<Widget> _pages = [
-    HomePage(),
+    DietListPage(),
     InputPage(),
-    InputPage(),
+    RecipeSharedPage(),
+    ProcuctPage(),
     ProfilePage(),
   ];
 
@@ -84,6 +95,10 @@ class _MyHomePageState extends State<MyHomePage> {
               label: '레시피',
             ),
             BottomNavigationBarItem(
+              icon: Icon(Icons.store),
+              label: '도매',
+            ),
+            BottomNavigationBarItem(
               icon: Icon(Icons.account_circle),
               label: '프로필',
             ),
@@ -112,31 +127,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-
-
-class HomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('Home Page'),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              // 버튼을 눌렀을 때 실행되는 동작
-            },
-            child: Text('test'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
-
 
 
 

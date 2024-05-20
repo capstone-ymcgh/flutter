@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'calendarpage.dart';
 import 'main.dart';
 import 'infopage.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert'; // for json encoding and decoding
 
 class DietPage extends StatefulWidget {
   final List<DateTime> selectedDates;
@@ -16,13 +17,20 @@ class DietPage extends StatefulWidget {
 class _DietPageState extends State<DietPage> {
   bool _isListView = true; // 현재 보기가 일렬 보기인지 여부를 저장할 변수
 
-
   final Map<DateTime, List<String>> texts = {
-    DateTime(2024, 5, 1): ['2024, 5, 1','미역국', '흰 쌀밥', '제육볶음', '배추김치'],
-    DateTime(2024, 5, 2): ['2024, 5, 2','김치찌개', '현미밥', '오징어볶음', '무생채'],
-    DateTime(2024, 6, 3): ['2024, 6, 3','된장찌개', '보리밥', '닭볶음탕', '깍두기'],
+    DateTime(2024, 5, 1): ['2024, 5, 1', '미역국', '흰 쌀밥', '제육볶음', '배추김치'],
+    DateTime(2024, 5, 2): ['2024, 5, 2', '김치찌개', '현미밥', '오징어볶음', '무생채'],
+    DateTime(2024, 6, 3): ['2024, 6, 3', '된장찌개', '보리밥', '닭볶음탕', '깍두기'],
     // 더 많은 날짜와 텍스트 추가...
   };
+
+  final TextEditingController _titleController = TextEditingController();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,13 +70,7 @@ class _DietPageState extends State<DietPage> {
             right: 16,
             bottom: 16,
             child: ElevatedButton(
-              onPressed: () {
-                // 버튼을 눌렀을 때 실행되는 동작
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => MyHomePage()),
-                );
-              },
+              onPressed: _showSaveDialog,
               child: Text('저장'),
               style: ElevatedButton.styleFrom(
                 shape: CircleBorder(),
@@ -80,6 +82,74 @@ class _DietPageState extends State<DietPage> {
         ],
       ),
     );
+  }
+
+  void _showSaveDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('제목 입력'),
+          content: TextField(
+            controller: _titleController,
+            decoration: InputDecoration(hintText: '제목을 입력하세요'),
+          ),
+          actions: [
+            TextButton(
+              child: Text('취소'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('저장'),
+              onPressed: () async {
+                String title = _titleController.text;
+                if (title.isNotEmpty) {
+                  // 제목과 함께 selectedDates와 texts 저장하는 로직 추가
+                  print('저장할 제목: $title');
+                  await _saveData(title);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyHomePage()),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _saveData(String title) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Increment dataCount by 1
+    int dataCount = (prefs.getInt('dataCount') ?? 0) + 1;
+    await prefs.setInt('dataCount', dataCount);
+
+    // Convert selectedDates to a list of strings
+    List<String> selectedDatesString =
+    widget.selectedDates.map((date) => date.toIso8601String()).toList();
+
+    // Convert texts to a Map<String, List<String>> to store in SharedPreferences
+    Map<String, List<String>> textsStringMap = texts.map(
+          (key, value) => MapEntry(key.toIso8601String(), value),
+    );
+
+    // Encode texts map as a JSON string
+    String textsJson = jsonEncode(textsStringMap);
+
+    // Save data with the incremented dataCount
+    await prefs.setString('title$dataCount', title);
+    await prefs.setStringList('selectedDates$dataCount', selectedDatesString);
+    await prefs.setString('texts$dataCount', textsJson);
+
+    print('Data saved');
+    print(title);
+    print(selectedDatesString);
+    print(textsJson);
   }
 
   Widget _buildView() {
@@ -136,7 +206,7 @@ class _DietPageState extends State<DietPage> {
             crossAxisCount: 7, // 한 줄에 7개의 박스
             mainAxisSpacing: 4.0, // 박스 사이의 수직 간격
             crossAxisSpacing: 4.0, // 박스 사이의 수평 간격
-            childAspectRatio: 0.5, // 박스의 가로 세로 비율
+            childAspectRatio: 0.3, // 박스의 가로 세로 비율
           ),
           itemBuilder: (context, index) {
             // 일요일부터 시작하도록 계산
