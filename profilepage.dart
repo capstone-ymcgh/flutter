@@ -92,6 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ],
           ),
+
           Divider(
             color: Colors.grey, // 선의 색상 설정
             thickness: 1, // 선의 두께 설정

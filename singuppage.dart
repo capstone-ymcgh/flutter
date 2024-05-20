@@ -15,6 +15,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   String userType = '일반 사용자'; // 기본 사용자 유형을 '일반 사용자'로 설정
 
+
   void _signUp() {
     // 입력된 값을 가져와 변수에 저장
     String email = emailController.text;
