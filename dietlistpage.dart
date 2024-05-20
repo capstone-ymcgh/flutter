@@ -13,6 +13,7 @@ class _DietListPageState extends State<DietListPage> {
   List<List<DateTime>> selectedDatesList = [];
   List<Map<DateTime, List<String>>> textsList = [];
 
+
   @override
   void initState() {
     super.initState();
