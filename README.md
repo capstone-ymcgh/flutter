@@ -16,3 +16,16 @@
 
 
 res파일 위치 >> C:\Androidstudio\fluttertest\android\app\src\main
+
+
+pubspec.yaml이 파일에
+
+dependencies:
+  flutter:
+    sdk: flutter
+  syncfusion_flutter_datepicker: ^25.1.42
+  shared_preferences: ^2.0.13
+  image_picker: ^0.8.4+4
+  provider: ^6.0.2
+
+이거 위치 찾아서 넣으셈요
