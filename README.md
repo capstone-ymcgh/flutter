@@ -38,6 +38,7 @@ dependencies:
 이거 위치 찾아서 넣으셈요
 
 그리구 
+
   assets:
   
     - assets/
