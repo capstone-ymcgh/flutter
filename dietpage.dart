@@ -17,6 +17,7 @@ class DietPage extends StatefulWidget {
 class _DietPageState extends State<DietPage> {
   bool _isListView = true; // 현재 보기가 일렬 보기인지 여부를 저장할 변수
 
+
   final Map<DateTime, List<String>> texts = {
     DateTime(2024, 5, 1): ['2024, 5, 1', '미역국', '흰 쌀밥', '제육볶음', '배추김치'],
     DateTime(2024, 5, 2): ['2024, 5, 2', '김치찌개', '현미밥', '오징어볶음', '무생채'],
