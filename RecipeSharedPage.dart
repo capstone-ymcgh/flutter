@@ -10,20 +10,6 @@ import 'package:intl/intl.dart';
 import '../test7/comment_icons.dart';
 import 'package:provider/provider.dart';
 
-
-void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) {
-        final provider = BoxListProvider();
-        provider.loadBoxList(); //데이터 로드
-        return provider;
-      },
-      child: MyApp(),
-    ),
-  );
-}
-
 // 작성된 시간을 가져와서 표시하는 함수
 String displayDateTime(DateTime postDateTime) {
   final now = DateTime.now();
@@ -47,7 +33,7 @@ String displayDateTime(DateTime postDateTime) {
   }
 }
 
-class MyApp extends StatelessWidget {
+class RecipeSharedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -572,11 +558,13 @@ class _DetailPageState extends State<DetailPage> {
   void initState() {
     super.initState();
     titleController = TextEditingController(text: widget.boxItem.title);
-    ingredientController = TextEditingController(text: widget.boxItem.ingredient);
+    ingredientController =
+        TextEditingController(text: widget.boxItem.ingredient);
     contentController = TextEditingController(text: widget.boxItem.content);
 
     // 좋아요 상태를 Provider에서 확인하여 초기화
-    final boxListProvider = Provider.of<BoxListProvider>(context, listen: false);
+    final boxListProvider = Provider.of<BoxListProvider>(
+        context, listen: false);
     isLiked = boxListProvider.isLiked(widget.boxItem);
   }
 
@@ -609,7 +597,8 @@ class _DetailPageState extends State<DetailPage> {
       index,
     );
 
-    final boxListProvider = Provider.of<BoxListProvider>(context, listen: false);
+    final boxListProvider = Provider.of<BoxListProvider>(
+        context, listen: false);
     boxListProvider.saveBoxList(); // 데이터 저장
   }
 
@@ -672,7 +661,7 @@ class _DetailPageState extends State<DetailPage> {
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView( // 게시물 수정 페이지와 게시물 페이지에 SingleChildScrollView 추가
         padding: const EdgeInsets.all(16.0),
         child: isEditing
             ? Column(
@@ -686,7 +675,8 @@ class _DetailPageState extends State<DetailPage> {
                   children: [
                     GestureDetector(
                       onTap: () async {
-                        final pickedImage = await ImagePicker().getImage(source: ImageSource.gallery);
+                        final pickedImage = await ImagePicker().getImage(
+                            source: ImageSource.gallery);
                         if (pickedImage != null) {
                           setState(() {
                             widget.boxItem.imagePath = pickedImage.path;
@@ -746,7 +736,8 @@ class _DetailPageState extends State<DetailPage> {
                 expands: true,
                 keyboardType: TextInputType.multiline,
                 controller: contentController,
-                decoration: InputDecoration(filled: true, hintText: '작성할 내용을 입력하세요.'),
+                decoration: InputDecoration(
+                    filled: true, hintText: '작성할 내용을 입력하세요.'),
               ),
             ),
           ],
@@ -804,7 +795,9 @@ class _DetailPageState extends State<DetailPage> {
             SizedBox(height: 3),
             Text(
               '연령대',
-              style: TextStyle(fontSize: 15.0, color: Colors.grey, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 15.0,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
             Divider(),
@@ -843,7 +836,8 @@ class _DetailPageState extends State<DetailPage> {
                 },
                 icon: Icon(Icons.favorite_border),
                 iconSize: 35,
-                color: widget.boxItem.likeCount > 0 ? Colors.red : Color(0xff4ECB71),
+                color: widget.boxItem.likeCount > 0 ? Colors.red : Color(
+                    0xff4ECB71),
                 padding: EdgeInsets.zero,
               ),
             ),
@@ -857,14 +851,14 @@ class _DetailPageState extends State<DetailPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => CommentPage(
-                        boxItem: widget.boxItem,
-                        onCommentAdded: onCommentAdded,
-                      ),
+                      builder: (context) =>
+                          CommentPage(
+                            boxItem: widget.boxItem,
+                            onCommentAdded: onCommentAdded,
+                          ),
                     ),
                   );
-                  setState(() {
-                  });
+                  setState(() {});
                 },
                 icon: Icon(Comment.customicons),
                 iconSize: 30,
