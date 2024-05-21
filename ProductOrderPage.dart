@@ -24,7 +24,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('도매 상품 주문'),
+        title: Text('도매가 리스트'),
         actions: <Widget>[
           IconButton(
             onPressed: () {
